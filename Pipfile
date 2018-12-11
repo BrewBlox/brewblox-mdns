@@ -1,13 +1,19 @@
 [[source]]
+
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
+
 [packages]
+
 brewblox-service = "~=0.14.0"
+aiozeroconf = "*"
+
 
 [dev-packages]
-pytest-flake8 = "*"
+
+"pytest-flake8" = "*"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-aiohttp = "*"
@@ -17,5 +23,7 @@ aioresponses = "*"
 "autopep8" = "*"
 brewblox-tools = "*"
 
+
 [requires]
+
 python_version = "3.7"

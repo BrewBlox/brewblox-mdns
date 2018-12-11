@@ -7,7 +7,6 @@ Any fixtures declared here are available to all test functions in this directory
 import logging
 
 import pytest
-
 from brewblox_service import service
 
 
@@ -40,7 +39,7 @@ def sys_args(app_config) -> list:
 
 @pytest.fixture
 def app(sys_args):
-    app = service.create_app('default', raw_args=sys_args[1:])
+    app = service.create_app(default_name='mdns_test', raw_args=sys_args[1:])
     return app
 
 
