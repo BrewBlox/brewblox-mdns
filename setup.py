@@ -9,7 +9,7 @@ setup(
     author='BrewPi',
     author_email='Development@brewpi.com',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python :: 3.7',
         'Intended Audience :: End Users/Desktop',
@@ -24,5 +24,4 @@ setup(
     ],
     python_requires='>=3.7',
     setup_requires=['setuptools_scm'],
-    extras_require={'dev': ['pipenv']},
 )
