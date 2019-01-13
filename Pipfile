@@ -17,7 +17,7 @@ aioresponses = "*"
 "flake8" = "*"
 "autopep8" = "*"
 brewblox-tools = "*"
-pytest = "~=4.0.0"
+pytest = "*"
 
 [requires]
 python_version = "3.7"

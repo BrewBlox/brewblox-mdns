@@ -19,8 +19,8 @@ setup(
     keywords='brewing brewpi brewblox embedded plugin service',
     packages=find_packages(exclude=['test', 'docker']),
     install_requires=[
-        'brewblox-service~=0.14.0',
-        'aiozeroconf~=0.1.8',
+        'brewblox-service',
+        'aiozeroconf',
     ],
     python_requires='>=3.7',
     setup_requires=['setuptools_scm'],
