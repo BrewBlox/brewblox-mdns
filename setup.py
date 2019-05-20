@@ -5,6 +5,7 @@ setup(
     use_scm_version={'local_scheme': lambda v: ''},
     description='mDNS support for BrewBlox systems',
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     url='https://github.com/BrewBlox/brewblox-mdns',
     author='BrewPi',
     author_email='Development@brewpi.com',
