@@ -6,11 +6,23 @@ import asyncio
 from socket import inet_aton
 
 import pytest
+from aiohttp.client_exceptions import ContentTypeError
 from aiozeroconf import ServiceInfo, ServiceStateChange
 
 from brewblox_mdns import dns_discovery
 
 TESTED = dns_discovery.__name__
+
+
+async def response(request, status=200):
+    retv = await request
+    if retv.status != status:
+        print(retv)
+        assert retv == status
+    try:
+        return await retv.json()
+    except ContentTypeError:
+        return await retv.text()
 
 
 class ServiceBrowserMock():
@@ -75,24 +87,38 @@ def browser_mock(mocker):
     return mocker.patch(TESTED + '.ServiceBrowser', ServiceBrowserMock)
 
 
-async def test_discover(app, client, loop, browser_mock, conf_mock):
+async def test_discover_one(app, client, loop, browser_mock, conf_mock):
     dns_type = dns_discovery.BREWBLOX_DNS_TYPE
-    assert await dns_discovery.discover(None, dns_type) == ('1.2.3.4', 1234)
-    assert await dns_discovery.discover('id2', dns_type) == ('4.3.2.1', 4321)
+    assert await dns_discovery.discover_one(None, dns_type) == ('1.2.3.4', 1234, 'id1')
+    assert await dns_discovery.discover_one('id2', dns_type) == ('4.3.2.1', 4321, 'id2')
 
-    assert await dns_discovery.discover(None, dns_type, 1) == ('1.2.3.4', 1234)
-    assert await dns_discovery.discover('id2', dns_type, 1) == ('4.3.2.1', 4321)
+    assert await dns_discovery.discover_one(None, dns_type, 1) == ('1.2.3.4', 1234, 'id1')
+    assert await dns_discovery.discover_one('id2', dns_type, 1) == ('4.3.2.1', 4321, 'id2')
 
     with pytest.raises(asyncio.TimeoutError):
-        await dns_discovery.discover(loop, 'leprechauns', 0.1)
+        await dns_discovery.discover_one(loop, 'leprechauns', 0.1)
 
 
-async def response(request):
-    retv = await request
-    assert retv.status == 200
-    return await retv.json()
+async def test_discover_all(app, client, loop, browser_mock, conf_mock):
+    dns_type = dns_discovery.BREWBLOX_DNS_TYPE
+    retv = []
+    async for res in dns_discovery.discover_all(None, dns_type, 0.01):
+        retv.append(res)
+    assert len(retv) == 2
 
 
 async def test_post_discover(app, client, loop, browser_mock, conf_mock):
-    assert await response(client.post('/discover', json={})) == {'host': '1.2.3.4', 'port': 1234}
-    assert await response(client.post('/discover', json={'id': 'id2'})) == {'host': '4.3.2.1', 'port': 4321}
+    resp1 = {
+        'host': '1.2.3.4',
+        'port': 1234,
+        'id': 'id1',
+    }
+    resp2 = {
+        'host': '4.3.2.1',
+        'port': 4321,
+        'id': 'id2',
+    }
+
+    assert await response(client.post('/discover', json={})) == resp1
+    assert await response(client.post('/discover', json={'id': 'id2'})) == resp2
+    assert await response(client.post('/discover_all', json={'timeout': 0.01})) == [resp1, resp2]
