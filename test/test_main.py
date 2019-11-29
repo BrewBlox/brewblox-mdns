@@ -28,8 +28,7 @@ def test_cli(mocker):
 
 def test_print_usb(mocker):
     entry = 'usb-Particle_P1_4f0052000551353432383931-if00'
-    retv = '\n'.join([entry]*2).encode()
-    m = mocker.patch(TESTED + '.check_output', return_value=retv)
+    m = mocker.patch(TESTED + '.glob', return_value=[entry]*2)
     m_print = mocker.patch(TESTED + '.print')
 
     main.print_usb()

@@ -7,7 +7,7 @@ import logging
 import re
 import sys
 from contextlib import suppress
-from subprocess import STDOUT, CalledProcessError, check_output
+from glob import glob
 
 from brewblox_service import brewblox_logger, service
 
@@ -17,12 +17,11 @@ LOGGER = brewblox_logger(__name__)
 
 
 def print_usb():
-    with suppress(CalledProcessError):
-        lines = check_output('ls /dev/serial/by-id', shell=True, stderr=STDOUT).decode()
-        for obj in re.finditer(r'particle_(?P<model>p1|photon)_(?P<serial>[a-z0-9]+)-',
-                               lines,
-                               re.IGNORECASE | re.MULTILINE):
-            print('usb', obj.group('serial'), obj.group('model'))
+    lines = '\n'.join([f for f in glob('/dev/serial/by-id/*')])
+    for obj in re.finditer(r'particle_(?P<model>p1|photon)_(?P<serial>[a-z0-9]+)-',
+                           lines,
+                           re.IGNORECASE | re.MULTILINE):
+        print('usb', obj.group('serial'), obj.group('model'))
 
 
 async def print_wifi():
