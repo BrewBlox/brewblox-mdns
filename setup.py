@@ -22,6 +22,7 @@ setup(
     install_requires=[
         'brewblox-service',
         'aiozeroconf',
+        'async-timeout',
     ],
     python_requires='>=3.7',
     setup_requires=['setuptools_scm'],
