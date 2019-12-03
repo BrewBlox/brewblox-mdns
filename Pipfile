@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 brewblox-service = ">=0.15.0"
 aiozeroconf = "*"
+async-timeout = "*"
+click = "*"
 
 [dev-packages]
 "pytest-flake8" = "*"
@@ -16,8 +18,8 @@ asynctest = "*"
 aioresponses = "*"
 "flake8" = "*"
 "autopep8" = "*"
-brewblox-tools = "*"
 pytest = "*"
+brewblox-dev = "*"
 
 [requires]
 python_version = "3.7"
