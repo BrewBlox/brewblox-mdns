@@ -6,9 +6,9 @@ import asyncio
 import logging
 import re
 import sys
-from contextlib import suppress
 from glob import glob
 
+import click
 from brewblox_service import brewblox_logger, service
 
 from brewblox_mdns import dns_discovery
@@ -32,11 +32,23 @@ async def print_wifi():
         print('wifi', serial, host, port)
 
 
+@click.command()
+@click.option('--cli', is_flag=True, help='Triggers CLI mode')
+@click.option('--discovery',
+              type=click.Choice(['all', 'usb', 'wifi']),
+              default='all',
+              help='Discovery setting. Use "all" to check both Wifi and USB')
+def cli(cli, discovery):
+    if discovery in ['all', 'usb']:
+        print_usb()
+
+    if discovery in ['all', 'wifi']:
+        asyncio.run(print_wifi())
+
+
 def main(args=sys.argv):
     if '--cli' in args:
-        with suppress(KeyboardInterrupt):
-            print_usb()
-            asyncio.run(print_wifi())
+        cli()
         return
 
     app = service.create_app(default_name='mdns')
