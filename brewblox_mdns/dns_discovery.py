@@ -36,13 +36,14 @@ async def _discover(id: str, dns_type: str, single: bool):
 
     try:
         ServiceBrowser(conf, dns_type, handlers=[sync_change_handler])
+        match = f'{id}.local.'.lower() if id else None
 
         while True:
             info = await queue.get()
             addr = inet_ntoa(info.address)
             if addr == '0.0.0.0':
                 continue  # discard simulators
-            if id is None or info.server == f'{id}.local.':
+            if match is None or info.server.lower() == match:
                 serial = info.server[:-len('.local.')]
                 LOGGER.info(f'Discovered {serial} @ {addr}:{info.port}')
                 yield addr, info.port, serial
