@@ -6,23 +6,12 @@ import asyncio
 from socket import inet_aton
 
 import pytest
-from aiohttp.client_exceptions import ContentTypeError
 from aiozeroconf import ServiceInfo, ServiceStateChange
 
 from brewblox_mdns import dns_discovery
+from brewblox_service.testing import response
 
 TESTED = dns_discovery.__name__
-
-
-async def response(request, status=200):
-    retv = await request
-    if retv.status != status:
-        print(retv)
-        assert retv == status
-    try:
-        return await retv.json()
-    except ContentTypeError:
-        return await retv.text()
 
 
 class ServiceBrowserMock():
