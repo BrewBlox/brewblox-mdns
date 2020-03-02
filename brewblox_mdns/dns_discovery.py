@@ -9,6 +9,7 @@ from socket import AF_INET, inet_ntoa
 from aiohttp import web
 from aiozeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
 from async_timeout import timeout
+
 from brewblox_service import brewblox_logger
 
 BREWBLOX_DNS_TYPE = '_brewblox._tcp.local.'
@@ -32,7 +33,7 @@ async def _discover(id: str, dns_type: str, single: bool):
 
     def sync_change_handler(_, service_type, name, state_change):
         if state_change is ServiceStateChange.Added:
-            asyncio.ensure_future(add_service(service_type, name))
+            asyncio.create_task(add_service(service_type, name))
 
     try:
         ServiceBrowser(conf, dns_type, handlers=[sync_change_handler])

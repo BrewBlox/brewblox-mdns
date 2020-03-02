@@ -7,6 +7,7 @@ Any fixtures declared here are available to all test functions in this directory
 import logging
 
 import pytest
+
 from brewblox_service import service
 
 
@@ -38,15 +39,22 @@ def sys_args(app_config) -> list:
 
 
 @pytest.fixture
+def event_loop(loop):
+    # aresponses uses the "event_loop" fixture
+    # this makes loop available under either name
+    yield loop
+
+
+@pytest.fixture
 def app(sys_args):
     app = service.create_app(default_name='mdns_test', raw_args=sys_args[1:])
     return app
 
 
 @pytest.fixture
-def client(app, aiohttp_client, loop):
+async def client(app, aiohttp_client, loop):
     """Allows patching the app or aiohttp_client before yielding it.
 
     Any tests wishing to add custom behavior to app can override the fixture
     """
-    return loop.run_until_complete(aiohttp_client(app))
+    return await aiohttp_client(app)
