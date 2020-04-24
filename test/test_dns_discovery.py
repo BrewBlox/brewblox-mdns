@@ -7,9 +7,9 @@ from socket import inet_aton
 
 import pytest
 from aiozeroconf import ServiceInfo, ServiceStateChange
+from brewblox_service.testing import response
 
 from brewblox_mdns import dns_discovery
-from brewblox_service.testing import response
 
 TESTED = dns_discovery.__name__
 
@@ -28,7 +28,7 @@ class ServiceBrowserMock():
 
 
 @pytest.fixture
-async def app(app):
+def app(app):
     dns_discovery.setup(app)
     return app
 
