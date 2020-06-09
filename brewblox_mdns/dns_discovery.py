@@ -7,10 +7,11 @@ from contextlib import suppress
 from socket import AF_INET, inet_ntoa
 
 from aiohttp import web
+from aiohttp_apispec import docs, request_schema, response_schema
 from aiozeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
 from async_timeout import timeout
-
 from brewblox_service import brewblox_logger
+from marshmallow import Schema, fields
 
 BREWBLOX_DNS_TYPE = '_brewblox._tcp.local.'
 DEFAULT_TIMEOUT_S = 5
@@ -56,87 +57,62 @@ async def _discover(id: str, dns_type: str, single: bool):
         await conf.close()
 
 
-async def discover_all(id: str, dns_type: str, timeout_v: int):
+async def discover_all(id: str, dns_type: str, timeout_v: float):
     with suppress(asyncio.TimeoutError):
         async with timeout(timeout_v):
             async for res in _discover(id, dns_type, False):
                 yield res
 
 
-async def discover_one(id: str, dns_type: str, timeout_v: int = None):
+async def discover_one(id: str, dns_type: str, timeout_v: float = None):
     async with timeout(timeout_v):
         async for res in _discover(id, dns_type, True):
             retv = res
         return retv
 
 
+class DisoveryRequestSchema(Schema):
+    id = fields.String(required=False)
+    dns_type = fields.String(required=False)
+    timeout = fields.Number(required=False)
+
+
+class DiscoveryResponseSchema(Schema):
+    host = fields.String(required=True)
+    port = fields.Integer(required=True)
+    id = fields.String(required=True)
+
+
+@docs(
+    tags=['mDNS'],
+    summary='Discovery mDNS-enabled devices',
+)
 @routes.post('/discover')
+@request_schema(DisoveryRequestSchema)
+@response_schema(DiscoveryResponseSchema)
 async def post_discover(request: web.Request) -> web.Response:
-    """
-    ---
-    summary: Discover mDNS services
-    tags:
-    - mDNS
-    operationId: mdns.discover
-    produces:
-    - application/json
-    parameters:
-    -
-        in: body
-        name: body
-        required: true
-        schema:
-            type: object
-            properties:
-                id:
-                    type: string
-                    required: false
-                    example: 3f0025000851353532343835
-                dns_type:
-                    type: string
-                    required: false
-                    example: _brewblox._tcp.local.
-    """
-    request_args = await request.json()
+    data = request['data']
     host, port, id = await discover_one(
-        request_args.get('id'),
-        request_args.get('dns_type', BREWBLOX_DNS_TYPE)
+        data.get('id'),
+        data.get('dns_type', BREWBLOX_DNS_TYPE),
+        data.get('timeout')
     )
     return web.json_response({'host': host, 'port': port, 'id': id})
 
 
+@docs(
+    tags=['mDNS'],
+    summary='Discovery all mDNS-enabled devices with desired service type',
+)
 @routes.post('/discover_all')
+@request_schema(DisoveryRequestSchema)
+@response_schema(DiscoveryResponseSchema(many=True))
 async def post_discover_all(request: web.Request) -> web.Response:
-    """
-    ---
-    summary: Discover all mDNS services
-    tags:
-    - mDNS
-    operationId: mdns.discover_all
-    produces:
-    - application/json
-    parameters:
-    -
-        in: body
-        name: body
-        required: true
-        schema:
-            type: object
-            properties:
-                dns_type:
-                    type: string
-                    required: false
-                    example: _brewblox._tcp.local.
-                timeout:
-                    type: int
-                    required: false
-                    example: 5
-    """
-    request_args = await request.json()
+    data = request['data']
     retv = []
-    async for res in discover_all(None,
-                                  request_args.get('dns_type', BREWBLOX_DNS_TYPE),
-                                  request_args.get('timeout', DEFAULT_TIMEOUT_S)):
+    async for res in discover_all(data.get('id'),
+                                  data.get('dns_type', BREWBLOX_DNS_TYPE),
+                                  data.get('timeout', DEFAULT_TIMEOUT_S)):
         host, port, id = res
         retv.append({'host': host, 'port': port, 'id': id})
     return web.json_response(retv)
