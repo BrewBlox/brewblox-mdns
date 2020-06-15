@@ -71,10 +71,10 @@ async def discover_one(id: str, dns_type: str, timeout_v: float = None):
         return retv
 
 
-class DisoveryRequestSchema(Schema):
-    id = fields.String(required=False)
-    dns_type = fields.String(required=False)
-    timeout = fields.Number(required=False)
+class DiscoveryRequestSchema(Schema):
+    id = fields.String(required=False, allow_none=True)
+    dns_type = fields.String(required=False, allow_none=True)
+    timeout = fields.Number(required=False, allow_none=True)
 
 
 class DiscoveryResponseSchema(Schema):
@@ -88,7 +88,7 @@ class DiscoveryResponseSchema(Schema):
     summary='Discovery mDNS-enabled devices',
 )
 @routes.post('/discover')
-@request_schema(DisoveryRequestSchema)
+@request_schema(DiscoveryRequestSchema)
 @response_schema(DiscoveryResponseSchema)
 async def post_discover(request: web.Request) -> web.Response:
     data = request['data']
@@ -105,7 +105,7 @@ async def post_discover(request: web.Request) -> web.Response:
     summary='Discovery all mDNS-enabled devices with desired service type',
 )
 @routes.post('/discover_all')
-@request_schema(DisoveryRequestSchema)
+@request_schema(DiscoveryRequestSchema)
 @response_schema(DiscoveryResponseSchema(many=True))
 async def post_discover_all(request: web.Request) -> web.Response:
     data = request['data']

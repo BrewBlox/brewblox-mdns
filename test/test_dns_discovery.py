@@ -108,6 +108,6 @@ async def test_post_discover(app, client, loop, browser_mock, conf_mock):
         'id': 'id2',
     }
 
-    assert await response(client.post('/discover', json={})) == resp1
+    assert await response(client.post('/discover', json={'id': None})) == resp1
     assert await response(client.post('/discover', json={'id': 'ID2'})) == resp2
     assert await response(client.post('/discover_all', json={'timeout': 0.01})) == [resp1, resp2]
