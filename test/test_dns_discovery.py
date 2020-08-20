@@ -7,7 +7,6 @@ from socket import inet_aton
 
 import pytest
 from aiozeroconf import ServiceInfo, ServiceStateChange
-from brewblox_service.testing import response
 
 from brewblox_mdns import dns_discovery
 
@@ -25,12 +24,6 @@ class ServiceBrowserMock():
         for name in ['id0', 'id1', 'id2']:
             self.handlers[0](conf, service_type, name, ServiceStateChange.Added)
             self.handlers[0](conf, service_type, name, ServiceStateChange.Removed)
-
-
-@pytest.fixture
-def app(app):
-    dns_discovery.setup(app)
-    return app
 
 
 @pytest.fixture
@@ -76,7 +69,7 @@ def browser_mock(mocker):
     return mocker.patch(TESTED + '.ServiceBrowser', ServiceBrowserMock)
 
 
-async def test_discover_one(app, client, loop, browser_mock, conf_mock):
+async def test_discover_one(loop, browser_mock, conf_mock):
     dns_type = dns_discovery.BREWBLOX_DNS_TYPE
     assert await dns_discovery.discover_one(None, dns_type) == ('1.2.3.4', 1234, 'id1')
     assert await dns_discovery.discover_one('id2', dns_type) == ('4.3.2.1', 4321, 'id2')
@@ -88,26 +81,9 @@ async def test_discover_one(app, client, loop, browser_mock, conf_mock):
         await dns_discovery.discover_one(loop, 'leprechauns', 0.1)
 
 
-async def test_discover_all(app, client, loop, browser_mock, conf_mock):
+async def test_discover_all(loop, browser_mock, conf_mock):
     dns_type = dns_discovery.BREWBLOX_DNS_TYPE
     retv = []
     async for res in dns_discovery.discover_all(None, dns_type, 0.01):
         retv.append(res)
     assert len(retv) == 2
-
-
-async def test_post_discover(app, client, loop, browser_mock, conf_mock):
-    resp1 = {
-        'host': '1.2.3.4',
-        'port': 1234,
-        'id': 'id1',
-    }
-    resp2 = {
-        'host': '4.3.2.1',
-        'port': 4321,
-        'id': 'id2',
-    }
-
-    assert await response(client.post('/discover', json={'id': None})) == resp1
-    assert await response(client.post('/discover', json={'id': 'ID2'})) == resp2
-    assert await response(client.post('/discover_all', json={'timeout': 0.01})) == [resp1, resp2]

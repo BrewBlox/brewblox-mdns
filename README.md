@@ -1,4 +1,4 @@
-# mDNS support for BrewBlox systems
+# mDNS support for Brewblox
 
 BrewPi Spark controllers broadcast themselves as mDNS services to allow automatic detection.
 
