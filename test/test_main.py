@@ -11,18 +11,6 @@ from brewblox_mdns import __main__ as main
 TESTED = main.__name__
 
 
-def test_main(mocker, app):
-    mocker.patch(TESTED + '.service.run')
-    mocker.patch(TESTED + '.service.create_app').return_value = app
-    main.main([])
-
-
-def test_cli_start(mocker):
-    m = mocker.patch(TESTED + '.cli')
-    main.main(['--cli'])
-    assert m.call_count == 1
-
-
 def test_print_usb(mocker):
     entry = 'usb-Particle_P1_4f0052000551353432383931-if00'
     m = mocker.patch(TESTED + '.glob', return_value=[entry]*2)
